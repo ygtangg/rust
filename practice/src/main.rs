@@ -2,19 +2,40 @@ use std::{cmp::Ordering, io};
 use rand::Rng;
 
 fn main() {
-    // Simple guessing game: 
-    //  randomly generate number
-    //  taking user input
-    let correct = rand::rng().random_range(1..=10);
-    // println!("correct: {correct}");
+    /*
+      Simple guessing game: 
+        - randomly generate one number
+        - taking user input
+      
+      Enhanced version:
+        - randomly generate multiple number
+        - user wins when correctly guessing all
+     */
+    let err_read_msg = "error reading input";
+
+    // Generates correct answers
+    let mut how_many = String::new();
+    println!("hey, how many random numbers would you like to guess?");
+    io::stdin()
+        .read_line(&mut how_many)
+        .expect(err_read_msg);
+    let num_guesses: u8 = how_many.trim().parse().expect(err_read_msg);
+
+    let mut correct = Vec::new();
+    for _ in 0..num_guesses {
+      correct.push(rand::rng().random_range(1..=10));
+    }    
+
+    // Main game loop
+    let mut guesses_made = 0;
     println!("hey, guess a number 1-10?");
 
     // loops until guessed correct number8
-    loop {
+    while guesses_made < num_guesses {
       let mut guess = String::new();
       io::stdin()
         .read_line(&mut guess)
-        .expect("error reading input");
+        .expect(err_read_msg);
 
       // type caset: convert input type to integer
       // using match for error handling
@@ -41,14 +62,20 @@ fn main() {
       */
 
       // match
-      match guess.cmp(&correct) {
+      match guess.cmp(&correct[guesses_made as usize]) {
         Ordering::Greater => println!("too high :("),
         Ordering::Less => println!("too low :("),
         Ordering::Equal => {
           println!("correct ;)");
-          break;
+          guesses_made += 1;
+          if guesses_made < num_guesses {
+              println!("try guessing another number now!");
+          }
         },
       };
-
+    }
+    println!("congrats, thanks for playing! the correct answers are");
+    for item in correct {
+      println!("{item}");
     }
 }
